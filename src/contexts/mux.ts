@@ -1,24 +1,6 @@
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
-
-/**
- * The IContext interface represents meta-states of jupyterlab, such as having an active notebook, console, text editor,
- * file browser, etc. Each context will have a signal that fires whenever the context becomes active or goes
- * inactive.
- */
-export interface IContext {
-    readonly name: string;
-    readonly currentState: IContext.State;
-    readonly stateChanged: ISignal<this, IContext.IChangedArgs>;
-}
-
-export namespace IContext {
-    export type State = 'active' | 'inactive';
-
-    export interface IChangedArgs {
-        newState: State;
-    }
-}
+import { IContext } from './index';
 
 export class ContextMultiplexer implements IDisposable {
     addContext(context: IContext): boolean {
@@ -30,13 +12,26 @@ export class ContextMultiplexer implements IDisposable {
         return hadPrev;
     }
 
+    hasContext(name: string): boolean {
+        return this._contexts.has(name);
+    }
+
+    getContext(name: string): IContext {
+        let context = this._contexts.get(name);
+        if (context !== undefined) {
+            return context;
+        } else {
+            throw new Error(`Context ${name} is not in mux`);
+        }
+    }
+
     onStateChanged = (
         context: IContext,
         stateChange: IContext.IChangedArgs
     ) => {
         this._multiplexer.emit({
             context: context.name,
-            newState: stateChange.newState
+            changeArgs: stateChange
         });
     };
 
@@ -71,6 +66,6 @@ export class ContextMultiplexer implements IDisposable {
 export namespace ContextMultiplexer {
     export interface IChangedArgs {
         context: string;
-        newState: IContext.State;
+        changeArgs: IContext.IChangedArgs;
     }
 }
