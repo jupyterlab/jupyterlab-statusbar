@@ -219,6 +219,12 @@ export class StatusBar extends Widget implements IStatusBar {
         }
     };
 
+    dispose() {
+        super.dispose();
+
+        this._contextManager.dispose();
+    }
+
     private _findInsertIndex(
         side: StatusBar.IRankItem[],
         newItem: StatusBar.IRankItem

@@ -10,7 +10,7 @@ export const IContextManager = new Token(
     'jupyterlab-statusbar/IContextManager'
 );
 
-export interface IContextManager {
+export interface IContextManager extends IDisposable {
     addItem(item: IContextManager.IItem): void;
     hasContext(context: string): boolean;
     addContext(context: IContext): void;
@@ -30,7 +30,7 @@ export namespace IContextManager {
     }
 }
 
-export class ContextManager implements IDisposable, IContextManager {
+export class ContextManager implements IContextManager {
     constructor() {
         this._mux.changed.connect(this.onContextChange);
     }

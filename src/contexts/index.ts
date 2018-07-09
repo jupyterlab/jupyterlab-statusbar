@@ -4,6 +4,7 @@ import { GlobalContext } from './global';
 import { NotebookContext } from './notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IContextManager, ContextManager } from './manager';
+import { IDisposable } from '../../node_modules/@phosphor/disposable';
 
 /**
  * The IContext interface represents meta-states of jupyterlab, such as having an active notebook, console, text editor,
@@ -15,7 +16,7 @@ import { IContextManager, ContextManager } from './manager';
  * such as that are left to each status item to implement.
  */
 
-export interface IContext {
+export interface IContext extends IDisposable {
     readonly name: string;
     readonly currentState: IContext.State;
     readonly stateChanged: ISignal<this, IContext.IChangedArgs>;

@@ -43,6 +43,8 @@ export class ContextMultiplexer implements IDisposable {
         if (!this._isDisposed) {
             this._contexts.forEach((context: IContext, key: string) => {
                 context.stateChanged.disconnect(this.onStateChanged);
+
+                context.dispose();
             });
 
             Signal.clearData(this);
