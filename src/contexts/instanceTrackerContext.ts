@@ -1,18 +1,27 @@
 import { IContext } from '.';
+import { IInstanceTracker } from '@jupyterlab/apputils';
+import { Widget } from '@phosphor/widgets';
 import { ISignal, Signal } from '@phosphor/signaling';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-export class NotebookContext implements IContext {
-    constructor(opts: NotebookContext.IOptions) {
+export class InstanceTrackerContext<
+    W extends Widget,
+    Tracker extends IInstanceTracker<W>
+> implements IContext {
+    constructor(opts: InstanceTrackerContext.IOptions<Tracker>) {
         this._tracker = opts.tracker;
+        this._name = opts.name;
 
         this._currentState =
             this._tracker.currentWidget === null ? 'inactive' : 'active';
-        this._tracker.currentChanged.connect(this.onActiveNotebookChange);
+        this._tracker.currentChanged.connect(this.onTrackedWidgetChange);
     }
 
     get name(): string {
-        return 'notebook';
+        return this._name;
+    }
+
+    get tracker(): Tracker {
+        return this._tracker;
     }
 
     get currentState(): IContext.State {
@@ -23,16 +32,13 @@ export class NotebookContext implements IContext {
         return this._stateChanged;
     }
 
-    onActiveNotebookChange = (
-        tracker: INotebookTracker,
-        panel: NotebookPanel | null
-    ) => {
-        if (panel === null && this._currentState === 'active') {
+    onTrackedWidgetChange = (tracker: Tracker, widget: W | null) => {
+        if (widget === null && this._currentState === 'active') {
             this._currentState = 'inactive';
             this._stateChanged.emit({
                 newState: 'inactive'
             });
-        } else if (panel !== null && this._currentState === 'inactive') {
+        } else if (widget !== null && this._currentState === 'inactive') {
             this._currentState = 'active';
             this._stateChanged.emit({
                 newState: 'active'
@@ -53,16 +59,19 @@ export class NotebookContext implements IContext {
         return this._isDisposed;
     }
 
+    private _name: string;
+    private _tracker: Tracker;
+
     private _isDisposed: boolean = false;
     private _stateChanged: Signal<this, IContext.IChangedArgs> = new Signal(
         this
     );
-    private _tracker: INotebookTracker;
     private _currentState: IContext.State = 'inactive';
 }
 
-export namespace NotebookContext {
-    export interface IOptions {
-        tracker: INotebookTracker;
+export namespace InstanceTrackerContext {
+    export interface IOptions<Tracker> {
+        tracker: Tracker;
+        name: string;
     }
 }
