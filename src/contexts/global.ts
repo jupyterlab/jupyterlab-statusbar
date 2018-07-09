@@ -14,6 +14,10 @@ export class GlobalContext implements IContext {
         return this._dummySignal;
     }
 
+    refresh(): void {
+        this._currentState = 'active';
+    }
+
     get isDisposed(): boolean {
         return this._isDisposed;
     }

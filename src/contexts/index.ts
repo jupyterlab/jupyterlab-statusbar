@@ -23,6 +23,8 @@ export interface IContext extends IDisposable {
     readonly name: string;
     readonly currentState: IContext.State;
     readonly stateChanged: ISignal<this, IContext.IChangedArgs>;
+
+    refresh(): void;
 }
 
 export namespace IContext {

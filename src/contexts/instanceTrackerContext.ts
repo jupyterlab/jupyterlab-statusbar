@@ -32,17 +32,31 @@ export class InstanceTrackerContext<
         return this._stateChanged;
     }
 
-    onTrackedWidgetChange = (tracker: Tracker, widget: W | null) => {
-        if (widget === null && this._currentState === 'active') {
+    refresh(): void {
+        if (this._tracker.currentWidget === null) {
             this._currentState = 'inactive';
-            this._stateChanged.emit({
-                newState: 'inactive'
-            });
-        } else if (widget !== null && this._currentState === 'inactive') {
+        } else {
             this._currentState = 'active';
-            this._stateChanged.emit({
-                newState: 'active'
-            });
+        }
+    }
+
+    onTrackedWidgetChange = (tracker: Tracker, widget: W | null) => {
+        console.log(`Context {${this.name}} changed.`);
+
+        if (widget === null) {
+            if (this._currentState === 'active') {
+                this._currentState = 'inactive';
+                this._stateChanged.emit({
+                    newState: 'inactive'
+                });
+            }
+        } else {
+            if (this._currentState === 'inactive') {
+                this._currentState = 'active';
+                this._stateChanged.emit({
+                    newState: 'active'
+                });
+            }
         }
     };
 
