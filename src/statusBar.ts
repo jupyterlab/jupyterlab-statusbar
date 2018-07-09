@@ -132,7 +132,11 @@ export class StatusBar extends Widget implements IStatusBar {
 
         this._contextManager.addItem({ name: id, contexts: opts.contexts });
 
-        widget.show();
+        if (this._contextManager.itemState(id) === 'active') {
+            widget.show();
+        } else {
+            widget.hide();
+        }
     }
 
     registerContext(context: IContext): void {

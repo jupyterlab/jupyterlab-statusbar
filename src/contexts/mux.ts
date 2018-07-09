@@ -25,6 +25,12 @@ export class ContextMultiplexer implements IDisposable {
         }
     }
 
+    refresh() {
+        this._contexts.forEach(context => {
+            context.refresh();
+        });
+    }
+
     onStateChanged = (
         context: IContext,
         stateChange: IContext.IChangedArgs

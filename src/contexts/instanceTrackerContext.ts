@@ -41,8 +41,6 @@ export class InstanceTrackerContext<
     }
 
     onTrackedWidgetChange = (tracker: Tracker, widget: W | null) => {
-        console.log(`Context {${this.name}} changed.`);
-
         if (widget === null) {
             if (this._currentState === 'active') {
                 this._currentState = 'inactive';

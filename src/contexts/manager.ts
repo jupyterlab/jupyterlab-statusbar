@@ -14,6 +14,8 @@ export interface IContextManager extends IDisposable {
     addItem(item: IContextManager.IItem): void;
     hasContext(context: string): boolean;
     addContext(context: IContext): void;
+    itemState(item: string): IContext.State | undefined;
+    refresh(): void;
 
     readonly itemsChanged: ISignal<this, IContextManager.IChangedArgs>;
 }
@@ -125,6 +127,19 @@ export class ContextManager implements IContextManager {
 
     hasContext(context: string): boolean {
         return this._mux.hasContext(context);
+    }
+
+    itemState(item: string): IContext.State | undefined {
+        let itemData = this._allItems.get(item);
+        if (itemData === undefined) {
+            return undefined;
+        } else {
+            return itemData[0];
+        }
+    }
+
+    refresh() {
+        this._mux.refresh();
     }
 
     get isDisposed() {
