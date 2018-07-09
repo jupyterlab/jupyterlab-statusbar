@@ -3,8 +3,34 @@ import { ContextMultiplexer } from './mux';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { SetExt } from '../util/set';
+import { Token } from '@phosphor/coreutils';
 
-export class ContextManager implements IDisposable {
+// tslint:disable-next-line:variable-name
+export const IContextManager = new Token(
+    'jupyterlab-statusbar/IContextManager'
+);
+
+export interface IContextManager {
+    addItem(item: IContextManager.IItem): void;
+    hasContext(context: string): boolean;
+    addContext(context: IContext): void;
+
+    readonly itemsChanged: ISignal<this, IContextManager.IChangedArgs>;
+}
+
+export namespace IContextManager {
+    export interface IItem {
+        name: string;
+        contexts: string[];
+    }
+
+    export interface IChangedArgs {
+        newState: IContext.State;
+        items: string[];
+    }
+}
+
+export class ContextManager implements IDisposable, IContextManager {
     constructor() {
         this._mux.changed.connect(this.onContextChange);
     }
@@ -13,8 +39,8 @@ export class ContextManager implements IDisposable {
         mux: ContextMultiplexer,
         change: ContextMultiplexer.IChangedArgs
     ) => {
-        let itemsBecameActive = new Array();
-        let itemsBecameInactive = new Array();
+        let itemsBecameActive = new Array<string>();
+        let itemsBecameInactive = new Array<string>();
 
         if (change.changeArgs.newState === 'active') {
             this._activeContexts.add(change.context);
@@ -45,6 +71,12 @@ export class ContextManager implements IDisposable {
                 items: itemsBecameActive,
                 newState: 'active'
             });
+
+            itemsBecameActive.forEach(itemId => {
+                const itemData = this._allItems.get(itemId)!;
+
+                this._allItems.set(itemId, ['active', itemData[1]]);
+            });
         }
 
         if (itemsBecameInactive.length > 0) {
@@ -52,14 +84,20 @@ export class ContextManager implements IDisposable {
                 newState: 'inactive',
                 items: itemsBecameInactive
             });
+
+            itemsBecameInactive.forEach(itemId => {
+                const itemData = this._allItems.get(itemId)!;
+
+                this._allItems.set(itemId, ['inactive', itemData[1]]);
+            });
         }
     };
 
-    get itemsChanged(): ISignal<this, ContextManager.IChangedArgs> {
+    get itemsChanged(): ISignal<this, IContextManager.IChangedArgs> {
         return this._itemsChanged;
     }
 
-    addItem(item: ContextManager.IItem) {
+    addItem(item: IContextManager.IItem) {
         const { name, contexts } = item;
 
         let activeContexts = SetExt.intersection(
@@ -79,6 +117,14 @@ export class ContextManager implements IDisposable {
 
     addContext(context: IContext) {
         this._mux.addContext(context);
+
+        if (context.currentState === 'active') {
+            this._activeContexts.add(context.name);
+        }
+    }
+
+    hasContext(context: string): boolean {
+        return this._mux.hasContext(context);
     }
 
     get isDisposed() {
@@ -97,22 +143,10 @@ export class ContextManager implements IDisposable {
     private _mux: ContextMultiplexer = new ContextMultiplexer();
     private _itemsChanged: Signal<
         this,
-        ContextManager.IChangedArgs
+        IContextManager.IChangedArgs
     > = new Signal(this);
 
     private _activeContexts: Set<string> = new Set();
 
     private _allItems: Map<string, [IContext.State, Set<string>]> = new Map();
-}
-
-export namespace ContextManager {
-    export interface IItem {
-        name: string;
-        contexts: string[];
-    }
-
-    export interface IChangedArgs {
-        newState: IContext.State;
-        items: string[];
-    }
 }

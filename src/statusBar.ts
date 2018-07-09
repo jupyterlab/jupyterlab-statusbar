@@ -7,6 +7,7 @@ import { ArrayExt, each } from '@phosphor/algorithm';
 import { IDefaultStatusesManager } from './defaults';
 import { IObservableSet } from './util/observableset';
 import { IObservableMap } from '@jupyterlab/observables';
+import { IContext, IContextManager } from './contexts';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
@@ -22,6 +23,8 @@ export interface IStatusBar {
         widget: Widget,
         opts: IStatusBar.IItemOptions
     ): void;
+
+    registerContext(context: IContext): void;
 }
 
 export namespace IStatusBar {
@@ -30,6 +33,7 @@ export namespace IStatusBar {
     export interface IItemOptions {
         align?: IStatusBar.Alignment;
         priority?: number;
+        contexts: string[];
     }
 }
 
@@ -47,6 +51,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
         this._host = options.host;
         this._defaultManager = options.defaultManager;
+        this._contextManager = options.contextManager;
 
         this.id = STATUS_BAR_ID;
         this.addClass(STATUS_BAR_CLASS);
@@ -76,12 +81,14 @@ export class StatusBar extends Widget implements IStatusBar {
 
             this.registerStatusItem(id, item, opts);
         });
+
+        this._contextManager.itemsChanged.connect(this.onContextItemChange);
     }
 
     registerStatusItem(
         id: string,
         widget: Widget,
-        opts: IStatusBar.IItemOptions = {}
+        opts: IStatusBar.IItemOptions = { contexts: [] }
     ) {
         if (id in this._statusItems) {
             throw new Error(`Status item ${id} already registered.`);
@@ -123,7 +130,19 @@ export class StatusBar extends Widget implements IStatusBar {
             this._rightSide.insertWidget(insertIndex, widget);
         }
 
+        this._contextManager.addItem({ name: id, contexts: opts.contexts });
+
         widget.show();
+    }
+
+    registerContext(context: IContext): void {
+        if (this._contextManager.hasContext(context.name)) {
+            throw new Error(
+                `Context ${context.name} has already been registered.`
+            );
+        }
+
+        this._contextManager.addContext(context);
     }
 
     /**
@@ -185,6 +204,21 @@ export class StatusBar extends Widget implements IStatusBar {
         }
     };
 
+    onContextItemChange = (
+        _contextManager: IContextManager,
+        change: IContextManager.IChangedArgs
+    ) => {
+        if (change.newState === 'active') {
+            change.items.forEach(itemId => {
+                this._statusItems[itemId].widget.show();
+            });
+        } else {
+            change.items.forEach(itemId => {
+                this._statusItems[itemId].widget.hide();
+            });
+        }
+    };
+
     private _findInsertIndex(
         side: StatusBar.IRankItem[],
         newItem: StatusBar.IRankItem
@@ -203,6 +237,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
     private _host: ApplicationShell;
     private _defaultManager: IDefaultStatusesManager;
+    private _contextManager: IContextManager;
 
     private _leftSide: Panel;
     private _rightSide: Panel;
@@ -220,6 +255,7 @@ export namespace StatusBar {
     export interface IOptions {
         host: ApplicationShell;
         defaultManager: IDefaultStatusesManager;
+        contextManager: IContextManager;
     }
 
     export interface IItem {
