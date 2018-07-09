@@ -91,7 +91,7 @@ export const runningKernelsItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'running-kernels-item',
             new RunningKernels({ host: app.shell }),
-            { align: 'left' }
+            { align: 'left', contexts: [] } // TODO add actual contexts for item
         );
     }
 };

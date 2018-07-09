@@ -116,7 +116,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'notebook-trust-item',
             new NotebookTrust({ tracker }),
-            {}
+            { contexts: [] } // TODO add actual contexts for item
         );
     }
 };
