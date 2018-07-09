@@ -38,6 +38,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.17.0-0",
     "@jupyterlab/apputils": "^0.17.0-0",
+    "@jupyterlab/console": "^0.17.0-1",
     "@jupyterlab/coreutils": "^2.0.0-0",
     "@jupyterlab/mainmenu": "^0.6.0-0",
     "@jupyterlab/notebook": "^0.17.0-0",

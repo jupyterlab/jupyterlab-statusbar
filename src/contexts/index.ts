@@ -4,7 +4,9 @@ import { GlobalContext } from './global';
 import { NotebookContext } from './notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IContextManager, ContextManager } from './manager';
-import { IDisposable } from '../../node_modules/@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
+import { IConsoleTracker } from '@jupyterlab/console';
+import { ConsoleContext } from './console';
 
 /**
  * The IContext interface represents meta-states of jupyterlab, such as having an active notebook, console, text editor,
@@ -33,11 +35,16 @@ export namespace IContext {
 export const contextManager: JupyterLabPlugin<IContextManager> = {
     id: 'jupyterlab-statusbar:contexts-manager',
     provides: IContextManager,
-    requires: [INotebookTracker],
-    activate: (_app: JupyterLab, tracker: INotebookTracker) => {
+    requires: [INotebookTracker, IConsoleTracker],
+    activate: (
+        _app: JupyterLab,
+        notebookTracker: INotebookTracker,
+        consoleTracker: IConsoleTracker
+    ) => {
         let defaultContexts = [
             new GlobalContext(),
-            new NotebookContext({ tracker })
+            new NotebookContext({ tracker: notebookTracker }),
+            new ConsoleContext({ tracker: consoleTracker })
         ];
         let manager = new ContextManager();
 
@@ -53,3 +60,4 @@ export * from './mux';
 export * from './manager';
 export * from './notebook';
 export * from './global';
+export * from './console';

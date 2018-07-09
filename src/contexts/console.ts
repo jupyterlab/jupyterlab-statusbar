@@ -1,18 +1,18 @@
 import { IContext } from '.';
 import { ISignal, Signal } from '@phosphor/signaling';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
-export class NotebookContext implements IContext {
-    constructor(opts: NotebookContext.IOptions) {
+export class ConsoleContext implements IContext {
+    constructor(opts: ConsoleContext.IOptions) {
         this._tracker = opts.tracker;
 
         this._currentState =
             this._tracker.currentWidget === null ? 'inactive' : 'active';
-        this._tracker.currentChanged.connect(this.onActiveNotebookChange);
+        this._tracker.currentChanged.connect(this.onActiveConsoleChange);
     }
 
     get name(): string {
-        return 'notebook';
+        return 'console';
     }
 
     get currentState(): IContext.State {
@@ -23,9 +23,9 @@ export class NotebookContext implements IContext {
         return this._stateChanged;
     }
 
-    onActiveNotebookChange = (
-        tracker: INotebookTracker,
-        panel: NotebookPanel | null
+    onActiveConsoleChange = (
+        tracker: IConsoleTracker,
+        panel: ConsolePanel | null
     ) => {
         if (panel === null && this._currentState === 'active') {
             this._currentState = 'inactive';
@@ -57,12 +57,12 @@ export class NotebookContext implements IContext {
     private _stateChanged: Signal<this, IContext.IChangedArgs> = new Signal(
         this
     );
-    private _tracker: INotebookTracker;
+    private _tracker: IConsoleTracker;
     private _currentState: IContext.State = 'inactive';
 }
 
-export namespace NotebookContext {
+export namespace ConsoleContext {
     export interface IOptions {
-        tracker: INotebookTracker;
+        tracker: IConsoleTracker;
     }
 }

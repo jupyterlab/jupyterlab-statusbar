@@ -1,8 +1,7 @@
 import { IContext } from './index';
-import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 
-export class GlobalContext implements IContext, IDisposable {
+export class GlobalContext implements IContext {
     get name(): string {
         return 'global';
     }
