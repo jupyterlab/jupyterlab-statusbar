@@ -8,8 +8,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDefaultStatusesManager } from './manager';
 
 import { Widget } from '@phosphor/widgets';
-
-// import { Kernel, KernelManager } from '@jupyterlab/services';
+import { DefaultContexts } from '../contexts';
 
 export namespace StatusComponent {
     export interface IState {
@@ -88,7 +87,10 @@ export const kernelStatusItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'kernel-status-item',
             new KernelStatus({ tracker }),
-            { align: 'left', contexts: [] } // TODO Add actual contexts
+            {
+                align: 'left',
+                contexts: [DefaultContexts.notebook, DefaultContexts.console]
+            }
         );
     }
 };

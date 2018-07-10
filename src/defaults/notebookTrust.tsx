@@ -6,6 +6,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { toArray } from '@phosphor/algorithm';
 import { Widget } from '@phosphor/widgets';
 import { IDefaultStatusesManager } from './manager';
+import { DefaultContexts } from '../contexts';
 
 export class NotebookTrustStatus extends React.Component<
     NotebookTrustStatus.IProps,
@@ -110,7 +111,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'notebook-trust-item',
             new NotebookTrust({ tracker }),
-            { contexts: ['notebook'] } // TODO add actual contexts for item
+            { contexts: [DefaultContexts.notebook] }
         );
     }
 };

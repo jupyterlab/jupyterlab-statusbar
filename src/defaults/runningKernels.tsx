@@ -11,6 +11,7 @@ import { IDefaultStatusesManager } from './manager';
 import { Kernel, KernelManager } from '@jupyterlab/services';
 
 import { Widget } from '@phosphor/widgets';
+import { DefaultContexts } from '../contexts';
 
 export namespace RunningComponent {
     export interface IState {
@@ -91,7 +92,7 @@ export const runningKernelsItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'running-kernels-item',
             new RunningKernels({ host: app.shell }),
-            { align: 'left', contexts: ['global'] } // TODO add actual contexts for item
+            { align: 'left', contexts: [DefaultContexts.global] }
         );
     }
 };

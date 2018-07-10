@@ -7,7 +7,8 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IStatusBar } from './../statusBar';
+import { IDefaultStatusesManager } from './manager';
+import { DefaultContexts } from '../contexts';
 
 export namespace LineColComponent {
     export interface IState {
@@ -89,17 +90,16 @@ export class LineCol extends Widget {
 export const lineColItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:line-col',
     autoStart: true,
-    requires: [IStatusBar, INotebookTracker],
+    requires: [IDefaultStatusesManager, INotebookTracker],
     activate: (
         app: JupyterLab,
-        statusBar: IStatusBar,
+        manager: IDefaultStatusesManager,
         tracker: INotebookTracker
     ) => {
-        statusBar.registerStatusItem(
-            'line-col-item',
-            new LineCol({ tracker }),
-            { align: 'left', contexts: [] } // TODO Add real contexts
-        );
+        manager.addDefaultStatus('line-col-item', new LineCol({ tracker }), {
+            align: 'left',
+            contexts: [DefaultContexts.notebook, DefaultContexts.document]
+        });
     }
 };
 
