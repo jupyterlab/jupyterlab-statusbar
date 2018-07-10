@@ -8,7 +8,7 @@
             "type": "array",
             "title": "Default Status Items",
             "description": "Which default items should appear in the status bar",
-            "default": ["notebook-trust-item", "running-kernels-item"]
+            "default": ["notebook-trust-item", "running-kernels-item", "file-upload-item", "line-col-item", "kernel-status-item"]
         }
     },
     "additionalProperties": false,

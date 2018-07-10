@@ -5,7 +5,7 @@ import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IStatusBar } from './../statusBar';
+import { IDefaultStatusesManager } from './manager';
 
 import {
     IUploadModel,
@@ -16,6 +16,7 @@ import {
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
+import { DefaultContexts } from '../contexts';
 
 export namespace FileUploadComponent {
     export interface IState {
@@ -95,16 +96,16 @@ export namespace FileUpload {
 export const fileUploadItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:file-upload',
     autoStart: true,
-    requires: [IStatusBar, IFileBrowserFactory],
+    requires: [IDefaultStatusesManager, IFileBrowserFactory],
     activate: (
         app: JupyterLab,
-        statusBar: IStatusBar,
+        manager: IDefaultStatusesManager,
         browser: IFileBrowserFactory
     ) => {
-        statusBar.registerStatusItem(
+        manager.addDefaultStatus(
             'file-upload-item',
             new FileUpload({ browser }),
-            { align: 'left' }
+            { align: 'left', contexts: [DefaultContexts.global] }
         );
     }
 };

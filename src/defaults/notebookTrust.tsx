@@ -6,6 +6,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { toArray } from '@phosphor/algorithm';
 import { Widget } from '@phosphor/widgets';
 import { IDefaultStatusesManager } from './manager';
+import { DefaultContexts } from '../contexts';
 
 export class NotebookTrustStatus extends React.Component<
     NotebookTrustStatus.IProps,
@@ -14,8 +15,7 @@ export class NotebookTrustStatus extends React.Component<
     state = {
         numTrustedCells: 0,
         numCells: 0,
-        activeCellTrusted: false,
-        hasActiveDocument: false
+        activeCellTrusted: false
     };
 
     constructor(props: NotebookTrustStatus.IProps) {
@@ -42,28 +42,24 @@ export class NotebookTrustStatus extends React.Component<
                 numCells,
                 activeCellTrusted: tracker.activeCell
                     ? tracker.activeCell.model.trusted
-                    : false,
-                hasActiveDocument: true
+                    : false
             });
         } else {
             this.setState({
                 numTrustedCells: 0,
                 numCells: 0,
-                activeCellTrusted: false,
-                hasActiveDocument: false
+                activeCellTrusted: false
             });
         }
     };
 
     render() {
         return (
-            this.state.hasActiveDocument && (
-                <div>
-                    Trusting {this.state.numTrustedCells} of{' '}
-                    {this.state.numCells} cells. Current cell is{' '}
-                    {this.state.activeCellTrusted ? 'trusted' : 'not trusted'}.
-                </div>
-            )
+            <div>
+                Trusting {this.state.numTrustedCells} of {this.state.numCells}{' '}
+                cells. Current cell is{' '}
+                {this.state.activeCellTrusted ? 'trusted' : 'not trusted'}.
+            </div>
         );
     }
 }
@@ -73,7 +69,6 @@ export namespace NotebookTrustStatus {
         numCells: number;
         numTrustedCells: number;
         activeCellTrusted: boolean;
-        hasActiveDocument: boolean;
     }
 
     export interface IProps {
@@ -116,7 +111,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'notebook-trust-item',
             new NotebookTrust({ tracker }),
-            {}
+            { contexts: [DefaultContexts.notebook] }
         );
     }
 };

@@ -8,8 +8,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDefaultStatusesManager } from './manager';
 
 import { Widget } from '@phosphor/widgets';
-
-// import { Kernel, KernelManager } from '@jupyterlab/services';
+import { DefaultContexts } from '../contexts';
 
 export namespace StatusComponent {
     export interface IState {
@@ -34,25 +33,21 @@ export class StatusComponent extends React.Component<
     }
 
     cellChanged = () => {
-        if (this.props.tracker.currentWidget.session.kernel) {
+        const currentWidget = this.props.tracker.currentWidget;
+        if (currentWidget !== null && currentWidget.session.kernel) {
             this.setState({
-                kernelStatus: this.props.tracker.currentWidget.session.kernel
-                    .status
+                kernelStatus: currentWidget.session.kernel.status
             });
-            this.props.tracker.currentWidget.session.statusChanged.connect(
-                this.kernelChanged
-            );
-            this.props.tracker.currentWidget.session.kernelChanged.connect(
-                this.kernelChanged
-            );
+            currentWidget.session.statusChanged.connect(this.kernelChanged);
+            currentWidget.session.kernelChanged.connect(this.kernelChanged);
         }
     };
 
     kernelChanged = () => {
-        if (this.props.tracker.currentWidget.session.kernel) {
+        const currentWidget = this.props.tracker.currentWidget;
+        if (currentWidget !== null && currentWidget.session.kernel) {
             this.setState({
-                kernelStatus: this.props.tracker.currentWidget.session.kernel
-                    .status
+                kernelStatus: currentWidget.session.kernel.status
             });
         } else {
             this.setState({ kernelStatus: 'dead' });
@@ -92,7 +87,10 @@ export const kernelStatusItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'kernel-status-item',
             new KernelStatus({ tracker }),
-            { align: 'left' }
+            {
+                align: 'left',
+                contexts: [DefaultContexts.notebook, DefaultContexts.console]
+            }
         );
     }
 };
