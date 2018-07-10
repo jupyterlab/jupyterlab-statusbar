@@ -1,13 +1,14 @@
 import { ISignal } from '@phosphor/signaling';
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 import { GlobalContext } from './global';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { NotebookPanel } from '@jupyterlab/notebook';
 import { IContextManager, ContextManager } from './manager';
 import { IDisposable } from '@phosphor/disposable';
-import { IConsoleTracker } from '@jupyterlab/console';
-import { InstanceTrackerContext } from './instanceTrackerContext';
-import { ITerminalTracker } from '@jupyterlab/terminal';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { ConsolePanel } from '@jupyterlab/console';
+import { Terminal } from '@jupyterlab/terminal';
+import { MainAreaContext } from './mainAreaContext';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import { MainAreaWidget } from '@jupyterlab/apputils';
 
 /**
  * The IContext interface represents meta-states of jupyterlab, such as having an active notebook, console, text editor,
@@ -35,39 +36,41 @@ export namespace IContext {
     }
 }
 
+export namespace DefaultContexts {
+    export const notebook = 'notebook';
+    export const console = 'console';
+    export const document = 'document';
+    export const terminal = 'terminal';
+    export const global = 'global';
+}
+
 export const contextManager: JupyterLabPlugin<IContextManager> = {
     id: 'jupyterlab-statusbar:contexts-manager',
     provides: IContextManager,
-    requires: [
-        INotebookTracker,
-        IConsoleTracker,
-        ITerminalTracker,
-        IEditorTracker
-    ],
-    activate: (
-        _app: JupyterLab,
-        notebookTracker: INotebookTracker,
-        consoleTracker: IConsoleTracker,
-        terminalTracker: ITerminalTracker,
-        fileEditorTracker: IEditorTracker
-    ) => {
+    activate: (app: JupyterLab) => {
         let defaultContexts = [
             new GlobalContext(),
-            new InstanceTrackerContext({
-                name: 'notebook',
-                tracker: notebookTracker
+            new MainAreaContext({
+                shell: app.shell,
+                name: DefaultContexts.notebook,
+                isWidget: x => x instanceof NotebookPanel
             }),
-            new InstanceTrackerContext({
-                name: 'console',
-                tracker: consoleTracker
+            new MainAreaContext({
+                shell: app.shell,
+                name: DefaultContexts.console,
+                isWidget: x => x instanceof ConsolePanel
             }),
-            new InstanceTrackerContext({
-                name: 'terminal',
-                tracker: terminalTracker
+            new MainAreaContext({
+                shell: app.shell,
+                name: DefaultContexts.terminal,
+                isWidget: x =>
+                    x instanceof MainAreaWidget &&
+                    (x as MainAreaWidget).content instanceof Terminal
             }),
-            new InstanceTrackerContext({
-                name: 'file-editor',
-                tracker: fileEditorTracker
+            new MainAreaContext({
+                shell: app.shell,
+                name: DefaultContexts.document,
+                isWidget: x => x instanceof DocumentWidget
             })
         ];
         let manager = new ContextManager();
@@ -83,3 +86,4 @@ export const contextManager: JupyterLabPlugin<IContextManager> = {
 export * from './mux';
 export * from './manager';
 export * from './global';
+export * from './mainAreaContext';
