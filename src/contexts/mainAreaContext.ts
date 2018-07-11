@@ -14,6 +14,8 @@ export class MainAreaContext implements IContext {
         this._stateChanged.connect((self, change) => {
             console.log(`${self.name} changed to ${change.newState}`);
         });
+
+        this.refresh();
     }
 
     onCurrentChanged = (

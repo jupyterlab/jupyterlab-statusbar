@@ -109,6 +109,9 @@ export class StatusBar extends Widget implements IStatusBar {
         };
 
         widget.addClass(STATUS_BAR_ITEM_CLASS);
+        if (widget.id !== id) {
+            widget.id = id; // TODO Should do this? Or nah?
+        }
 
         this._statusItems[id] = wrapper;
 
@@ -131,12 +134,6 @@ export class StatusBar extends Widget implements IStatusBar {
         }
 
         this._contextManager.addItem({ name: id, contexts: opts.contexts });
-
-        if (this._contextManager.itemState(id) === 'active') {
-            widget.show();
-        } else {
-            widget.hide();
-        }
     }
 
     registerContext(context: IContext): void {
